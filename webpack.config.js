@@ -8,7 +8,7 @@ const config = {
   context: __dirname,
   devtool: "cheap-eval-source-map",
   entry: {
-    main: APP_DIR + "/index.jsx"
+    main: APP_DIR + "/ClientApp.jsx"
   },
   output: {
     filename: "bundle.js",
