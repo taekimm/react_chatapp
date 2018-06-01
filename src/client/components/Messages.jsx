@@ -7,13 +7,16 @@ class Messages extends Component {
   render() {
     return (
       <div>
+        <fieldset>
+          <legend>{this.props.roomName}</legend>
         {this.props.messages.map(message => {
           return (
             <div>
-              {message.author}: {message.message}
+              {message}
             </div>
           );
         })}
+        </fieldset>
       </div>
     );
   }

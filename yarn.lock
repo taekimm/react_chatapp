@@ -5421,3 +5421,7 @@ yeoman-generator@^2.0.5:
     text-table "^0.2.0"
     through2 "^2.0.0"
     yeoman-environment "^2.0.5"
+
+zipcodes@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/zipcodes/-/zipcodes-6.0.0.tgz#068f6e2192df27b0c0db32bf5696c12e7f6f63db"
