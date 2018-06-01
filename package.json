@@ -27,6 +27,7 @@
   "scripts": {
     "start": "node src/server/server.js",
     "dev": "nodemon src/server/server.js",
-    "webpack": "./node_modules/.bin/webpack -w"
+    "webpack dev": "./node_modules/.bin/webpack -w"
+    // "heroku-postbuild": "cd client && yarn && yarn run build"
   }
 }

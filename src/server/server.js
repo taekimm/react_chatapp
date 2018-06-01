@@ -6,22 +6,22 @@ const path = require("path");
 // package for zipcode
 const zipcodePkg = require("zipcodes");
 
-// webpack stuff for hot reload
-const webpack = require("webpack");
-const webpackConfigURL = path.join(__dirname + "/../../webpack.config");
-const webpackConfig = require(webpackConfigURL);
-const compiler = webpack(webpackConfig);
+// // webpack stuff for hot reload
+// const webpack = require("webpack");
+// const webpackConfigURL = path.join(__dirname + "/../../webpack.config");
+// const webpackConfig = require(webpackConfigURL);
+// const compiler = webpack(webpackConfig);
 
-// wepback HMR
-app.use(
-  require("webpack-dev-middleware")(compiler, {
-    noInfo: true,
-    publicPath: webpackConfig.output.publicPath,
-    stats: false
-  })
-);
+// // wepback HMR
+// app.use(
+//   require("webpack-dev-middleware")(compiler, {
+//     noInfo: true,
+//     publicPath: webpackConfig.output.publicPath,
+//     stats: false
+//   })
+// );
 
-app.use(require("webpack-hot-middleware")(compiler));
+// app.use(require("webpack-hot-middleware")(compiler));
 
 // static assets
 app.use(express.static(path.join(__dirname, "/../../public")));

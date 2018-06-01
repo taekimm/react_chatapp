@@ -8,19 +8,19 @@ const config = {
   context: __dirname,
   devtool: "cheap-eval-source-map",
   entry: {
-    // main: APP_DIR + "/ClientApp.jsx"
-    index: [
-      "webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000",
-      APP_DIR + "/ClientApp.jsx"
-    ]
+    main: APP_DIR + "/ClientApp.jsx"
+    // index: [
+    //   "webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000",
+    //   APP_DIR + "/ClientApp.jsx"
+    // ]
   },
   output: {
     filename: "bundle.js",
     path: BUILD_DIR,
-    hotUpdateChunkFilename: "./hot/[id].[hash].hot-update.js",
-    hotUpdateMainFilename: "./hot/[hash].hot-update.json"
+    // hotUpdateChunkFilename: "./hot/[id].[hash].hot-update.js",
+    // hotUpdateMainFilename: "./hot/[hash].hot-update.json"
   },
-  plugins: [ new webpack.HotModuleReplacementPlugin()],
+  // plugins: [ new webpack.HotModuleReplacementPlugin()],
   resolve: {
     extensions: [".js", ".jsx", "json"]
   },
