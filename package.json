@@ -25,7 +25,8 @@
     "webpack-cli": "^2.1.4"
   },
   "scripts": {
-    "start": "nodemon src/server/server.js",
+    "start": "node src/server/server.js",
+    "dev": "nodemon src/server/server.js",
     "webpack": "./node_modules/.bin/webpack -w"
   }
 }

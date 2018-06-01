@@ -24,7 +24,6 @@ class Chat extends Component {
   }
 
   render() {
-    let disableChat = this.props.isInChat ? false : true
     return (
       <div>
         <br />
@@ -35,9 +34,10 @@ class Chat extends Component {
             placeholder="Type your message here!"
             value={this.state.message}
             onChange={this.handleMessageChange}
-            disabled={disableChat}
           />
         </form>
+        <br />
+        <button onClick={this.props.leaveChat}>Leave Chat</button>
       </div>
     );
   }

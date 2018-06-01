@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import io from "socket.io-client";
 
-import RoomSelect from "./RoomSelect";
 import UsernameInput from "./UsernameInput";
+import ZipcodeInput from "./ZipcodeInput";
+import RoomSelect from "./RoomSelect";
 import Chat from "./Chat";
 import Messages from "./Messages";
 
@@ -14,42 +15,42 @@ class Landing extends Component {
       socketID: "",
       username: "",
       zipcode: "",
+      location: "",
       activeRoom: "",
       allChatRooms: [],
-      messages: []
+      messages: [],
+
+      // var for multi-step form
+      step: 1
     };
 
     this.socket = io("localhost:5000");
 
     // socket methods
     this.socket.on("SOCKET_ID", data => {
-      addSocketID(data);
+      this.setState({ socketID: data });
     });
 
-    this.socket.emit("FIND_CITY", this.state.zipcode)
+    this.socket.on("SET_CITY", loc => {
+      this.setState({ location: loc });
+    });
 
     this.socket.on("ACTIVE_ROOMS", data => {
-      updateAllChatRooms(data);
+      this.setState({ allChatRooms: data });
     });
 
     this.socket.on("UPDATE_CHAT", (username, message) => {
       this.addMessage(username, message);
     });
 
-    // helper methods for Sockets
-    const addSocketID = data => {
-      this.setState({ socketID: data });
-    };
-
-    const updateAllChatRooms = data => {
-      this.setState({ allChatRooms: data });
-    };
-
     // rebinding this
     this.setUsername = this.setUsername.bind(this);
+    this.setZipcode = this.setZipcode.bind(this);
     this.setActiveRoom = this.setActiveRoom.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.addMessage = this.addMessage.bind(this);
+    this.changeStep = this.changeStep.bind(this);
+    this.leaveChat = this.leaveChat.bind(this);
   }
 
   addMessage(username, message) {
@@ -59,6 +60,16 @@ class Landing extends Component {
 
   setUsername(name) {
     this.setState({ username: name });
+    this.changeStep("next");
+  }
+
+  setZipcode(zipcode) {
+    this.setState({ zipcode: zipcode });
+    this.socket.emit("FIND_CITY", {
+      socketID: this.state.socketID,
+      zipcode: zipcode
+    });
+    this.changeStep("next");
   }
 
   setActiveRoom(event) {
@@ -69,7 +80,7 @@ class Landing extends Component {
       roomName: event.target.value,
       username: this.state.username
     });
-    // this.addMessage(username, message);
+    this.changeStep("next");
   }
 
   sendMessage(message) {
@@ -81,41 +92,74 @@ class Landing extends Component {
     this.addMessage(this.state.username, message);
   }
 
-  // method for conditional loading RoomSelect or Messages
-  renderChatArea(activeChatRoom) {
-    if (activeChatRoom) {
-      return <Messages messages={this.state.messages} roomName={this.state.activeRoom} />;
-    } else {
-      return (
-        <RoomSelect
-          allRooms={this.state.allChatRooms}
-          setActiveRoom={this.setActiveRoom}
-        />
-      );
+  leaveChat() {
+    this.socket.emit("LEAVE_ROOM", {
+      roomName: this.state.activeRoom,
+      username: this.state.username
+    });
+    this.setState({ activeRoom: "", messages: [] });
+    this.changeStep("prev");
+  }
+
+  changeStep(dir) {
+    if (dir === "prev") {
+      console.log("prev flagged");
+      this.setState({ step: this.state.step - 1 });
+    } else if (dir === "next") {
+      this.setState({ step: this.state.step + 1 });
     }
   }
 
-  // method for conditional loading Chat or UsernameInput
-  renderInputArea(username) {
-    if (username) {
-      return (
-        <Chat username={this.state.username} sendMessage={this.sendMessage} isInChat={this.state.activeRoom} />
-      );
-    } else {
-      return <UsernameInput setUsername={this.setUsername} />;
+  multiPageReg(step) {
+    switch (step) {
+      case 1:
+        return (
+          <UsernameInput
+            setUsername={this.setUsername}
+            changeStep={this.changeStep}
+          />
+        );
+      case 2:
+        return (
+          <ZipcodeInput
+            setZipcode={this.setZipcode}
+            changeStep={this.changeStep}
+          />
+        );
+      case 3:
+        return (
+          <RoomSelect
+            allRooms={this.state.allChatRooms}
+            currLocation={this.state.location}
+            setActiveRoom={this.setActiveRoom}
+            changeStep={this.changeStep}
+          />
+        );
+      case 4:
+        return (
+          <div>
+            <Messages
+              messages={this.state.messages}
+              roomName={this.state.activeRoom}
+              currLocation={this.state.location}
+            />
+            <Chat
+              username={this.state.username}
+              currLocation={this.state.location}
+              sendMessage={this.sendMessage}
+              leaveChat={this.leaveChat}
+            />
+          </div>
+        );
     }
   }
 
   render() {
-    let isInChat = this.state.activeRoom ? true : false;
-    let hasUsername = this.state.username ? true : false;
-
     return (
       <div>
         <fieldset>
           <legend>React ChatApp!</legend>
-          {this.renderChatArea(isInChat)}
-          {this.renderInputArea(hasUsername)}
+          {this.multiPageReg(this.state.step)}
         </fieldset>
       </div>
     );

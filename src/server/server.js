@@ -4,7 +4,7 @@ const server = require("http").Server(app);
 const path = require("path");
 
 // package for zipcode
-const zipcodes = require('zipcodes')
+const zipcodePkg = require("zipcodes");
 
 // webpack stuff for hot reload
 const webpack = require("webpack");
@@ -44,29 +44,30 @@ const io = require("socket.io")(server);
 var usernames = {};
 var rooms = [
   {
-    name: "",
-    users: {}
-  },
-  {
-    name: "",
-    users: {}
-  },
-  {
-    name: "",
-    users: {}
+    name: "General Chat",
+    users: []
   }
 ];
 
 io.on("connection", socket => {
+  // send socketID && active rooms to client on init
   io.to(socket.id).emit("SOCKET_ID", socket.id);
   io.to(socket.id).emit("ACTIVE_ROOMS", rooms);
 
-  socket.on("FIND_CITY", zipcode => {
-    let cityInfo = zipcodes.lookup(zipcode)
-    let cityString = `${cityInfo.city}, ${cityInfo.state}`
-    rooms.push({name: cityString})
-    io.to(data.socketID).emit("SET_CITY", city);
-  })
+  // find city name by zipcode
+  socket.on("FIND_CITY", data => {
+    let city = zipcodePkg.lookup(data.zipcode).city;
+    let state = zipcodePkg.lookup(data.zipcode).state;
+    let locString = `${city}, ${state}`;
+
+    // check if room exists, if not, create && send rooms w/ new room
+    if (rooms.filter(obj => obj.name === locString).length == 0) {
+      rooms.push({ name: locString, users: [] });
+      io.emit("ACTIVE_ROOMS", rooms);
+    }
+    // send city, state name to client
+    io.to(data.socketID).emit("SET_CITY", locString);
+  });
 
   socket.on("JOIN_ROOM", data => {
     usernames[data.userID] = data.userID;
@@ -85,8 +86,20 @@ io.on("connection", socket => {
       );
   });
 
-  socket.on("MESSAGE_SENT", data => {
-    socket.broadcast.to(data.roomName).emit("UPDATE_CHAT", data.username, data.message)
-  });
+  socket.on("LEAVE_ROOM", data => {
+    socket.leave(data.roomName)
+    socket.broadcast.
+    to(data.roomName)
+    .emit(
+      "UPDATE_CHAT",
+      "SERVER",
+      `${data.username} has left this room`
+    )
+  })
 
+  socket.on("MESSAGE_SENT", data => {
+    socket.broadcast
+      .to(data.roomName)
+      .emit("UPDATE_CHAT", data.username, data.message);
+  });
 });
