@@ -24,7 +24,7 @@ class Landing extends Component {
       step: 1
     };
 
-    this.socket = io("localhost:5000");
+    this.socket = io();
 
     // socket methods
     this.socket.on("SOCKET_ID", data => {
